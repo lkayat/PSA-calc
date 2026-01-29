@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prostate Volume and PSA Density Calculator</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #27ae60;
+            --bg-color: #f0f2f5;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 15px;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 450px;
+            box-sizing: border-box;
+        }
+        h2 { color: var(--primary-color); margin-bottom: 20px; text-align: center; font-size: 1.4rem; }
+        .input-row { display: flex; gap: 10px; margin-bottom: 15px; }
+        .input-group { flex: 1; margin-bottom: 15px; }
+        label { display: block; margin-bottom: 6px; font-size: 0.9rem; font-weight: 600; color: #444; }
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccd1d9;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+        input:focus { outline: none; border-color: var(--accent-color); }
+        .results-box {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        .res-line { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 1rem; }
+        .res-val { font-weight: bold; color: var(--primary-color); }
+        .report-area { margin-top: 20px; }
+        textarea {
+            width: 100%;
+            height: 90px;
+            padding: 12px;
+            border: 1px solid #ccd1d9;
+            border-radius: 6px;
+            background: #fff;
+            font-family: inherit;
+            font-size: 0.95rem;
+            resize: none;
+            margin-bottom: 10px;
+        }
+        .copy-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .copy-btn:hover { background: #1a252f; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Prostate Volume & PSA Density</h2>
+    
+    <label>Dimensions (cm)</label>
+    <div class="input-row">
+        <input type="number" id="m1" placeholder="M1" step="0.1" oninput="runCalc()">
+        <input type="number" id="m2" placeholder="M2" step="0.1" oninput="runCalc()">
+        <input type="number" id="m3" placeholder="M3" step="0.1" oninput="runCalc()">
+    </div>
+
+    <div class="input-group">
+        <label>PSA Value (ng/mL)</label>
+        <input type="number" id="psa" placeholder="e.g. 1.9" step="0.01" oninput="runCalc()">
+    </div>
+
+    <div class="results-box">
+        <div class="res-line"><span>Weight (C3):</span> <span class="res-val" id="weight">0.0 g</span></div>
+        <div class="res-line"><span>PSA Density (B5):</span> <span class="res-val" id="psad">0.00</span></div>
+    </div>
+
+    <div class="report-area">
+        <label>Report String (A8):</label>
+        <textarea id="output-text" readonly></textarea>
+        <button class="copy-btn" onclick="copyToClipboard()">Copy Text</button>
+    </div>
+</div>
+
+<script>
+    function runCalc() {
+        const a1 = parseFloat(document.getElementById('m1').value) || 0;
+        const a2 = parseFloat(document.getElementById('m2').value) || 0;
+        const a3 = parseFloat(document.getElementById('m3').value) || 0;
+        const a5 = parseFloat(document.getElementById('psa').value) || 0;
+
+        // Weight Formula (C3): A1 * A2 * A3 * 0.5236
+        const c3 = a1 * a2 * a3 * 0.5236;
+        
+        // PSA Density Formula (B5): A5 / C3
+        const b5 = c3 > 0 ? (a5 / c3) : 0;
+
+        // Update UI
+        document.getElementById('weight').innerText = c3.toFixed(1) + " g";
+        document.getElementById('psad').innerText = b5.toFixed(2);
+
+        // Formatted String (A8)
+        const a8 = `The prostate measures ${a1} x ${a2} x ${a3} cm.\nProstate weight is estimated at ${c3.toFixed(1)} g. PSA density is ${b5.toFixed(2)} ng/mL/g.`;
+        document.getElementById('output-text').value = a8;
+    }
+
+    function copyToClipboard() {
+        const text = document.getElementById('output-text');
+        text.select();
+        document.execCommand('copy');
+        
+        const btn = document.querySelector('.copy-btn');
+        const originalText = btn.innerText;
+        btn.innerText = "Copied!";
+        btn.style.background = "#27ae60";
+        
+        setTimeout(() => {
+            btn.innerText = originalText;
+            btn.style.background = "#2c3e50";
+        }, 1500);
+    }
+</script>
+
+</body>
+</html>
